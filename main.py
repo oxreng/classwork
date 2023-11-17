@@ -9,6 +9,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('Ui.ui', self)
+        self.coords = []
         self.do_paint = False
         self.btn_push.clicked.connect(self.paint)
 
@@ -28,7 +29,10 @@ class MainWindow(QMainWindow):
         qp.save()
         qp.setBrush(QColor(255, 255, 0))
         x_0, y_0, l = randint(0, 700), randint(0, 500), randint(10, 100)
-        qp.drawEllipse(x_0, y_0, l, l)
+        self.coords.append((x_0, y_0, l))
+        for kor in self.coords:
+            x_0, y_0, l = kor[0], kor[1], kor[2]
+            qp.drawEllipse(x_0, y_0, l, l)
         qp.restore()
 
 
