@@ -7,15 +7,29 @@
     <x>0</x>
     <y>0</y>
     <width>790</width>
-    <height>532</height>
+    <height>530</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Эспрессо</string>
+   <string>Капучино</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
+     <widget class="QPushButton" name="btn_add_coffee">
+      <property name="text">
+       <string>Добавить кофе</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QPushButton" name="btn_edit_coffe">
+      <property name="text">
+       <string>Изменить кофе</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="2">
      <widget class="QTableWidget" name="coffee_table">
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>
