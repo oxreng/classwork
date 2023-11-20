@@ -1,24 +1,44 @@
+import sqlite3
 import sys
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication
-from PyQt5.QtGui import QPainter, QColor
-from random import randint
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QApplication
 
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
-        MainWindow.setMinimumSize(QtCore.QSize(800, 0))
-        MainWindow.setMaximumSize(QtCore.QSize(800, 600))
+        MainWindow.resize(790, 532)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.btn_push = QtWidgets.QPushButton(self.centralwidget)
-        self.btn_push.setGeometry(QtCore.QRect(320, 500, 141, 41))
-        self.btn_push.setObjectName("btn_push")
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName("gridLayout")
+        self.coffee_table = QtWidgets.QTableWidget(self.centralwidget)
+        self.coffee_table.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.coffee_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.coffee_table.setTabKeyNavigation(True)
+        self.coffee_table.setProperty("showDropIndicator", True)
+        self.coffee_table.setDragEnabled(False)
+        self.coffee_table.setDragDropOverwriteMode(True)
+        self.coffee_table.setDragDropMode(QtWidgets.QAbstractItemView.NoDragDrop)
+        self.coffee_table.setDefaultDropAction(QtCore.Qt.IgnoreAction)
+        self.coffee_table.setAlternatingRowColors(False)
+        self.coffee_table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.coffee_table.setTextElideMode(QtCore.Qt.ElideRight)
+        self.coffee_table.setObjectName("coffee_table")
+        self.coffee_table.setColumnCount(0)
+        self.coffee_table.setRowCount(0)
+        self.coffee_table.horizontalHeader().setVisible(True)
+        self.coffee_table.horizontalHeader().setCascadingSectionResizes(False)
+        self.coffee_table.horizontalHeader().setHighlightSections(True)
+        self.coffee_table.horizontalHeader().setSortIndicatorShown(False)
+        self.coffee_table.horizontalHeader().setStretchLastSection(False)
+        self.coffee_table.verticalHeader().setCascadingSectionResizes(False)
+        self.coffee_table.verticalHeader().setHighlightSections(True)
+        self.coffee_table.verticalHeader().setStretchLastSection(False)
+        self.gridLayout.addWidget(self.coffee_table, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 790, 21))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -30,46 +50,41 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Git и желтые окружности"))
-        self.btn_push.setText(_translate("MainWindow", "Сделать кружок"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Эспрессо"))
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.coords = []
-        self.do_paint = False
-        self.btn_push.clicked.connect(self.paint)
+        self.con = sqlite3.connect("coffee.sqlite")
+        self.cur = self.con.cursor()
+        self.update_coffee()
 
-    def paintEvent(self, event):
-        if self.do_paint:
-            qp = QPainter()
-            qp.begin(self)
-            self.draw_krug(qp)
-            qp.end()
-        self.do_paint = False
-
-    def paint(self):
-        self.do_paint = True
-        self.repaint()
-
-    def draw_krug(self, qp):
-        x_0, y_0, l = randint(0, 700), randint(0, 500), randint(10, 100)
-        self.coords.append((x_0, y_0, l, (randint(0, 255), randint(0, 255), randint(0, 255))))
-        for kor in self.coords:
-            qp.setBrush(QColor(*kor[3]))
-            x_0, y_0, l = kor[0], kor[1], kor[2]
-            qp.drawEllipse(x_0, y_0, l, l)
+    def update_coffee(self):
+        self.coffee_table.clearContents()
+        result = self.cur.execute("""SELECT coffee.id, types.title, coffee.degree, coffee.in_what, 
+        coffee.description, coffee.price, coffee.amount FROM coffee 
+        LEFT JOIN types ON types.id = coffee.type""").fetchall()
+        self.coffee_table.setRowCount(len(result))
+        self.coffee_table.setColumnCount(len(result[0]))
+        self.coffee_table.setHorizontalHeaderLabels(
+            ['ID', "Название сорта", "Степень обжарки", "Молотый/в зёрнах", "Описание вкуса", "Цена в рублях",
+             "Объём упаковки в граммах"])
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                self.coffee_table.setItem(i, j, QTableWidgetItem(str(val)))
+        self.statusbar.showMessage('')
+        self.coffee_table.resizeColumnsToContents()
 
 
 def except_hook(cls, exception, traceback):
     sys.__excepthook__(cls, exception, traceback)
 
 
-if __name__ == "__main__":
-    sys.excepthook = except_hook
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = MainWindow()
-    ex.show()
+    form = MainWindow()
+    form.show()
+    sys.excepthook = except_hook
     sys.exit(app.exec())
