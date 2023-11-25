@@ -248,10 +248,10 @@ class AddEditCoffee(QMainWindow, Ui_addEditCoffeeForm):
 
     def get_elem(self):
         data = self.parent.cur.execute("SELECT * FROM coffee WHERE id = ?", (self.coffee_id,)).fetchone()
-        self.type.setPlainText(data[1])
-        self.degree.setPlainText(data[2])
+        self.type.setPlainText(str(data[1]))
+        self.degree.setPlainText(str(data[2]))
         self.in_what.setPlainText(data[3])
-        self.description.setPlainText(data[4])
+        self.description.setPlainText(str(data[4]))
         self.price.setPlainText(str(data[5]))
         self.amount.setPlainText(str(data[6]))
 
